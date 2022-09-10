@@ -4,8 +4,8 @@ import datetime
 
 from Creature import Creature
 
-GREY = (125, 125, 125)
-RED = (255, 0, 0)
+COLOR_NONE = (125, 125, 125)
+COLOR_BORDER = (255, 0, 0)
 
 
 class CreaturesField:
@@ -130,10 +130,10 @@ class CreaturesField:
             self._changed = True
 
         if self._changed:
-            self._surf.fill(RED)
+            self._surf.fill(COLOR_BORDER)
             for h in range(self._height):
                 for w in range(self._width):
-                    color = GREY
+                    color = COLOR_NONE
                     if self._matrix[w, h] is not None:
                         color = self._matrix[w, h].color
 

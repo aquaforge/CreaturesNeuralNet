@@ -1,10 +1,7 @@
 import pygame as pg
-
-
 from CreaturesField import CreaturesField
 
-BLACK = (0, 0, 0)
-
+COLOR_BACKGROUND = (0, 0, 0)
 
 class DrawScene:
     def __init__(self, sc: pg.Surface):
@@ -16,7 +13,7 @@ class DrawScene:
     def draw(self, creatures_field : CreaturesField):
         surf = creatures_field.surf
         if creatures_field.need_redraw or self._need_redraw:
-            self._sc.fill(BLACK)
+            self._sc.fill(COLOR_BACKGROUND)
             self._sc.blit(surf, (self._left, self._top))
             pg.display.update()
             self._need_redraw = False
