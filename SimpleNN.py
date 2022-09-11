@@ -1,6 +1,7 @@
 import numpy as np
 
 
+
 class SimpleNN:
     def __init__(self, input_dim: int):
         self._list = [(input_dim, None, None, None)]

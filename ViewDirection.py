@@ -1,4 +1,5 @@
 
+
 class ViewDirection:
     def __init__(self):
         ViewDirection.dict_direction = {
