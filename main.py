@@ -16,16 +16,15 @@ from DrawScene import DrawScene
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-SCREEN_WIDTH = 1500
-SCREEN_HEIGHT = 900
-DRAW_FPS = 60
-CALC_FPS = 60
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_FPS = 60
 
-FIELD_BLOCK_SIZE = 5
-FIELD_BLOCK_MARGIN = 0
+FIELD_WIDTH = 85
+FIELD_HEIGHT = 65
+FIELD_BLOCK_SIZE = 8
+FIELD_BLOCK_MARGIN = 1
 FIELD_BORDER_MARGIN = 5
-
-running = True
 
 
 def handle_events(draw_scene: DrawScene, creatures_field: CreaturesField):
@@ -58,81 +57,80 @@ def handle_events(draw_scene: DrawScene, creatures_field: CreaturesField):
 
 
 def thread_all(creatures_field: CreaturesField):
-    global running
-
     print("thread_all started")
     while running:
         creatures_field.do_one_step()
         pg.display.set_caption(
             f"Creatures {creatures_field.width} x {creatures_field.height} Count={creatures_field.creatures_count}")
-        #print("thread_all one step")
+        # print("thread_all one step")
 
     print("thread_all done")
 
 
+running = True
+
+
+def calculations(creatures_field: CreaturesField):
+    global running
+
+    while running:
+        creatures_field.do_one_step()
+
+
 def main():
     global running
-    creatures_field = CreaturesField(240, 160, FIELD_BLOCK_SIZE, FIELD_BLOCK_MARGIN, FIELD_BORDER_MARGIN)
 
     _ = Creature(None)
     _ = ViewDirection()
 
+    creatures_field = CreaturesField(FIELD_WIDTH, FIELD_HEIGHT)
+
     # for i in range(100):
     for i in range(creatures_field.width * creatures_field.height // 3):
-
-        # model = keras.Sequential()
-        # model.add(keras.layers.Dense(units=len(Creature.dict_input) * 2, activation="relu",
-        #                              input_dim=len(Creature.dict_input), use_bias=True))
-        # model.add(keras.layers.Dense(units=len(Creature.dict_output) * 2, activation="relu", use_bias=True))
-        # model.add(keras.layers.Dense(units=len(Creature.dict_output) * 2, activation="relu", use_bias=True))
-        # model.add(keras.layers.Dense(units=len(Creature.dict_output), activation="softmax"))
-        # model.compile(loss="mean_squared_error", optimizer=keras.optimizers.Adam(0.01))
-
         model = SimpleNN(len(Creature.dict_input))
-        model.add(len(Creature.dict_input) * 2 - 1, activation="relu", use_bias=True)
-        model.add(len(Creature.dict_output) * 2 + 1, activation="relu", use_bias=False)
+        model.add(len(Creature.dict_input) + 1, activation="relu", use_bias=True)
+        model.add(len(Creature.dict_output) + 1, activation="relu", use_bias=False)
         model.add(len(Creature.dict_output), activation="softmax")
-
         creature = Creature(model, (rnd.randrange(255), rnd.randrange(255), rnd.randrange(255)))
         creatures_field[(rnd.randrange(creatures_field.width), rnd.randrange(creatures_field.height))] = creature
 
     pg.init()
     sc = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pg.display.set_caption(f"Creatures {creatures_field.width} x {creatures_field.height}")
+    pg.display.set_caption(f"Field: {creatures_field.width}x{creatures_field.height}")
     clock = pg.time.Clock()
 
-    draw_scene = DrawScene(sc)
+    draw_scene = DrawScene(sc, creatures_field, FIELD_BLOCK_SIZE, FIELD_BLOCK_MARGIN, FIELD_BORDER_MARGIN)
 
-    tic = time.perf_counter()
-    delay = 1.0 / CALC_FPS
+    th = threading.Thread(name="calculation", target=calculations, daemon=True, args=(creatures_field,))
+    th.start()
 
-    # thread_one_step = threading.Thread(target=thread_all, name="thread_one_step", args=creatures_field)
-    # thread_one_step.start()
-
-    age = 0
     while running:
-        clock.tick(DRAW_FPS)
+        clock.tick(SCREEN_FPS)
         running = handle_events(draw_scene, creatures_field)
+        # creatures_field.do_one_step()
+        draw_scene.draw()
 
-        creatures_field.do_one_step()
-        pg.display.set_caption(
-            f"Creatures {creatures_field.width} x {creatures_field.height} Count={creatures_field.creatures_count} Age={age}")
-        age += 1
-        print("thread_all one step")
+    pg.quit()
 
-        # print(threading.enumerate())
-        # print(threading.enumerate())
-        # toc = time.perf_counter()
-        # if toc - tic > delay and not thread_one_step.is_alive():
-        #     pg.display.set_caption(
-        #         f"Creatures {creatures_field.width} x {creatures_field.height} Count={creatures_field.creatures_count}")
-        #     thread_one_step.start()
-        #     print(threading.enumerate())
-        #     tic = time.perf_counter()
+    # b = False
+    # for item in threading.enumerate():
+    #     if item.name == "thread_one_step":
+    #         b = True
+    #         break
+    # if not b:
+    #     thread_one_step = threading.Thread(target=creatures_field.do_one_step, name="thread_one_step")
+    #     thread_one_step.start()
+    # print("thread_all one step")
 
-        draw_scene.draw(creatures_field)
+    # print(threading.enumerate())
+    # print(threading.enumerate())
+    # toc = time.perf_counter()
+    # if toc - tic > delay and not thread_one_step.is_alive():
+    #     pg.display.set_caption(
+    #         f"Creatures {creatures_field.width} x {creatures_field.height} Count={creatures_field.creatures_count}")
+    #     thread_one_step.start()
+    #     print(threading.enumerate())
+    #     tic = time.perf_counter()
 
-
-pg.quit()
 
 main()

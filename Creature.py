@@ -10,17 +10,16 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 class Creature:
-    def __init__(self, brain: SimpleNN, color: tuple = (100, 100, 100), health: int = 100):
+    def __init__(self, brain: SimpleNN, color: tuple = (200, 100, 200), health: int = 100):
         if not hasattr(Creature, '_id'):
             Creature._id = 0
         Creature._id += 1
         self._id = Creature._id
-        #print(f"ID: {self._id}")
-        #
         self._moved = False
+
         self._color = color
         self._view_direction = 0
-        self._age = 0
+        self._age = 1
         self._health = health
         self._brain = brain
         #
@@ -48,6 +47,10 @@ class Creature:
     def health(self):
         return self._health
 
+    @property
+    def color(self):
+        return self._color
+
     @health.setter
     def health(self, value: int):
         self._health = value
@@ -68,23 +71,19 @@ class Creature:
     def moved(self, value):
         self._moved = value
 
-    # @staticmethod
-    # def in_field(x: int, y: int, matrix: np.ndarray):
-    #     return 0 <= x < matrix.shape[0] and 0 <= y < matrix.shape[1]
-
     @staticmethod
     def in_field(pos: tuple, matrix: np.ndarray):
         return 0 <= pos[0] < matrix.shape[0] and 0 <= pos[1] < matrix.shape[1]
 
     def do_one_step(self, pos_x: int, pos_y: int, matrix: np.ndarray):
         if self._moved:
-            return False
+            return
         self._moved = True
 
         self._health -= 1
         if self._health <= 0:
             matrix[pos_x, pos_y] = None
-            return True
+            return
 
         self._age += 1
 
@@ -112,16 +111,16 @@ class Creature:
         action = output_vector.argmax()
 
         if action == Creature.dict_output['STAY']:
-            return False
+            return
         elif action == Creature.dict_output['PHOTOSYNTHESIS']:
             self.health += 10
-            return False
+            return
         elif action == Creature.dict_output['ROTATE_LEFT']:
             self._view_direction = ViewDirection.rotate(self._view_direction, -1)
-            return True
+            return
         elif action == Creature.dict_output['ROTATE_RIGHT']:
             self._view_direction = ViewDirection.rotate(self._view_direction, 1)
-            return True
+            return
         else:
             x, y = ViewDirection.add_delta(self._view_direction, (pos_x, pos_y))
             if Creature.in_field((x, y), matrix):
@@ -129,24 +128,20 @@ class Creature:
                     if matrix[x, y] is None:
                         matrix[pos_x, pos_y] = None
                         matrix[x, y] = self
-                        return True
+                        return
                 elif action == Creature.dict_output['EAT']:
                     if matrix[x, y] is not None:
                         matrix[x, y] = None
                         self.health += 50
-                        return True
+                        return
                 elif action == Creature.dict_output['DUPLICATE']:
                     if self._health > 50 and matrix[x, y] is None:
                         creature = Creature(self._brain, self._color, self._health // 2)
                         matrix[x, y] = creature
                         self._health -= creature.health
-                        return True
-        return False
+                        return
+        return
 
-    @property
-    def color(self):
-        return self._color
-
-    @property
-    def move_direction(self):
-        return self._view_direction
+    # @property
+    # def move_direction(self):
+    #     return self._view_direction
