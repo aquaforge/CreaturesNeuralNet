@@ -1,5 +1,3 @@
-from enum import Enum
-
 
 class ViewDirection:
     def __init__(self):

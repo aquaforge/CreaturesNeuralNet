@@ -18,7 +18,7 @@ class DrawScene:
             pg.display.update()
             self._need_redraw = False
             creatures_field.need_redraw = False
-            # print("sc_redraw")
+            print("sc_redraw")
 
     @property
     def left(self):
