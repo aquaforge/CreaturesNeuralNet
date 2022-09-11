@@ -4,7 +4,6 @@ from CreaturesField import CreaturesField
 COLOR_BACKGROUND = (0, 0, 0)
 COLOR_BORDER = (255, 0, 0)
 
-
 class DrawScene():
     def __init__(self, sc: pg.Surface, creatures_field: CreaturesField, block_size: int, margin_inner: int,
                  margin_outer: int):

@@ -6,7 +6,6 @@ from Creature import Creature
 
 COLOR_NONE = (125, 125, 125)
 
-
 class CreaturesField:
     def __init__(self, width: int, height: int):
         self._width = width

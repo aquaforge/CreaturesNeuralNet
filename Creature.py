@@ -1,13 +1,10 @@
 import os
 import numpy as np
-import random as rnd
-
 from SimpleNN import SimpleNN
 # from tensorflow import keras
 from ViewDirection import ViewDirection
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
 
 class Creature:
     def __init__(self, brain: SimpleNN, color: tuple = (200, 100, 200), health: int = 100):
